@@ -150,8 +150,8 @@ class PuzzleGenerator:
         print('failed')
             
     def print_solution(self, file=None):
-        print('Best Solution:')
-        print(self.sol)
+#        print('Best Solution:')
+        self.sp.print_path(self.sol)
         print(self.ans, 'steps to get to target in total.')
         
 if __name__ == '__main__':
@@ -166,11 +166,11 @@ if __name__ == '__main__':
     step = 10
     import time
     
-    for i in range(num):
+    for i in range(0, num):
         m, n = exper[i]
         with open('bfs_{0}_{1}.txt'.format(m, n), 'w') as bfs_file, \
         open('A_star_{0}_{1}.txt'.format(m, n), 'w') as a_star_file:
-            print('--------------------')
+            print('*********************************')
             print('bfs:')
             for _ in range(step):
                 st_time = time.time()
@@ -180,7 +180,7 @@ if __name__ == '__main__':
                 pz.print_solution()
                 print('time:', used)
                 bfs_file.write('time: {0}\n'.format(used))
-            print('--------------------')
+            print('\n*********************************')
             print('A*:')
             for _ in range(step):
                 st_time = time.time()
