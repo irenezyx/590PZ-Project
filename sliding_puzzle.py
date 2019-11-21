@@ -7,6 +7,11 @@ class SlidingPuzzle:
         self.set_start()
         self.set_target()
         self.solution = None
+        
+#    An important pruning:
+#    According to research, the set of states can be split in half which are exclusive
+#    one could transform to target
+#    the other half must could transform to 1, 2, ..., N-3, N-1, N-2, 0
     
     def A_star(self):
         # f(n)=g(n)+h(n), 
@@ -19,7 +24,7 @@ class SlidingPuzzle:
         #   then we need at least counts of the total diff to move to the final state
         #   therefore, h(n) won't overestimate
         if not self.board: return -1
-        N, m, n, start, target = self.N, self.m, self.n, self.start, self.target
+        N, m, n, start, target, impossible = self.N, self.m, self.n, self.start, self.target, self.impossible
         
         def heur(state):
             ans = 0
@@ -42,6 +47,9 @@ class SlidingPuzzle:
         heapq.heapify(heap)
         while heap:
             f, state, pos0, depth, path = heapq.heappop(heap)
+            if state == impossible: 
+                return -1
+#            print(state)
             if state == target:
 #                self.print_path(path)
                 self.solution = path
@@ -66,7 +74,7 @@ class SlidingPuzzle:
     
     def bfs(self):
         if not self.board: return -1
-        N, m, n, target = self.N, self.m, self.n, self.target
+        N, m, n, target, impossible = self.N, self.m, self.n, self.target, self.impossible
         # 1. Use BFS to find the shortest path for start node (start state) to the target state (target node). A state is a kind of placement of numbers.
         # 2. When BFS, get neighbor nodes(states) by the position of 0
         # 3. to easier make the state hashable (tuple), store each state in one-demension
@@ -81,6 +89,8 @@ class SlidingPuzzle:
         queue = deque([[start, pos, 0, [start]]]) # note that queue generates from the iterable in the bracket
         while queue:
             state, pos0, depth, path = queue.popleft()
+            if state == impossible:
+                return -1
             if state == target:
 #                self.print_path(path)
                 self.solution = path
@@ -115,6 +125,8 @@ class SlidingPuzzle:
         target = [i+1 for i in range(N)]
         target[N-1] = 0
         self.target = tuple(target)
+        impossible = list(range(1, N-2)) + [N-1, N-2, 0]
+        self.impossible = tuple(impossible)
         
     def set_start(self):
         start = [self.board[i][j] for i in range(self.m) for j in range(self.n)]
@@ -166,21 +178,22 @@ if __name__ == '__main__':
     step = 10
     import time
     
-    for i in range(0, num):
+    for i in range(3):
         m, n = exper[i]
         with open('bfs_{0}_{1}.txt'.format(m, n), 'w') as bfs_file, \
         open('A_star_{0}_{1}.txt'.format(m, n), 'w') as a_star_file:
-            print('*********************************')
-            print('bfs:')
-            for _ in range(step):
-                st_time = time.time()
-                pz = PuzzleGenerator(m, n, True)
-                end_time = time.time()
-                used = end_time-st_time
-                pz.print_solution()
-                print('time:', used)
-                bfs_file.write('time: {0}\n'.format(used))
-            print('\n*********************************')
+            if i < 2:
+                print('*********************************')
+                print('bfs:')
+                for _ in range(step):
+                    st_time = time.time()
+                    pz = PuzzleGenerator(m, n, True)
+                    end_time = time.time()
+                    used = end_time-st_time
+                    pz.print_solution()
+                    print('time:', used)
+                    bfs_file.write('time: {0}\n'.format(used))
+                print('\n*********************************')
             print('A*:')
             for _ in range(step):
                 st_time = time.time()
